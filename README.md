@@ -11,7 +11,7 @@ I have used H2 as in Memory Database 	The implementations also uses Cache sco
 	Caching can be disabled by passing a query parameter bypasscache=true
 
 This mule project is built without using maven. so, it will not manage its dependencies.Manually we need to add jar files 
-which are needed, So attched the same.
+which are needed, So attached the same.
 
 Unit testing:
 
