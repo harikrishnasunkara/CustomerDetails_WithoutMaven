@@ -1,0 +1,7 @@
+{
+  "main": "customersearchapi.raml",
+  "name": "customersearchapi",
+  "classifier": "raml",
+  "tags": [],
+  "dependencies": []
+}

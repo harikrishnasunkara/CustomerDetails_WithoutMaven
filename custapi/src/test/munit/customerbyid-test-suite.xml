@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:spring="http://www.springframework.org/schema/beans" xmlns:core="http://www.mulesoft.org/schema/mule/core" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
+    <munit:config name="munit" doc:name="MUnit configuration"/>
+    <spring:beans>
+        <spring:import resource="classpath:customersearchapiimpl.xml"/>
+    </spring:beans>
+    <munit:test name="customerbyid-test-suite-with-existing-id" description="Test">
+        <munit:set payload="#[]" doc:name="Set Message">
+            <munit:invocation-properties>
+                <munit:invocation-property key="id" value="5"/>
+            </munit:invocation-properties>
+        </munit:set>
+        <flow-ref name="customerbyid" doc:name="Flow-ref to customerbyid"/>
+        <munit:assert-not-null doc:name="Assert Not Null Payload"/>
+        <munit:assert-true condition="#[payload.id==5]" doc:name="Assert True"/>
+    </munit:test>
+    <munit:test name="customerbyid-test-suite-with-nonexisting-id" description="Test">
+        <munit:set payload="#[]" doc:name="Set Message">
+            <munit:invocation-properties>
+                <munit:invocation-property key="id" value="100"/>
+            </munit:invocation-properties>
+        </munit:set>
+        <flow-ref name="customerbyid" doc:name="Flow-ref to customerbyid"/>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+payload]]></dw:set-payload>
+        </dw:transform-message>
+        <munit:assert-true condition="#[payload.size()==0]" doc:name="Assert True"/>
+    </munit:test>
+</mule>

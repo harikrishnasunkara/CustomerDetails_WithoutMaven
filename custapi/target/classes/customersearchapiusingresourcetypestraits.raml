@@ -1,0 +1,36 @@
+#%RAML 1.0
+title: customersearchapiusing resourcetypes and traits
+baseUri: http://localhost:8081/api
+version: 1.0
+
+types: 
+  Customer: !include datatypes/CustomerType.raml
+uses: 
+  Traits: libraries/traitslibrary.raml
+
+/customers: 
+  get:
+    description: Retrieve a list of customers
+    displayName: Get all customers
+    is:  
+      [Traits.pageable,Traits.searchablebypostcode,Traits.cacheable]
+    responses: 
+      200:
+        body: 
+          application/json:
+            type: Customer[] 
+            example: !include examples/customers.raml
+          
+
+  /{id}:
+    get:
+      description: Retrieve a  customer by id
+      displayName: Get a customer by id
+      responses: 
+        200:
+          body: 
+            application/json:
+              type: Customer
+              example: !include examples/customer.raml
+
+  

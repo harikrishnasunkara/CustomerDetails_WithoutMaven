@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:jdbc="http://www.mulesoft.org/schema/mule/jdbc"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/jdbc http://www.mulesoft.org/schema/mule/jdbc/current/mule-jdbc.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<spring:beans>
+		<spring:bean id="dataSource" name="dataSource"
+			class="org.enhydra.jdbc.standard.StandardDataSource">
+			<spring:property name="driverName" value="org.h2.Driver" />
+			<spring:property name="url" value="jdbc:h2:~/test" />
+            <spring:property name="user" value="sa"/>
+
+		</spring:bean>
+        <spring:bean id="dbinitializer" name="dbinitializer`" class="com.hari.DbInitializer"/>
+
+
+		
+		
+	</spring:beans>
+    <db:generic-config name="Generic_Database_Configuration" dataSource-ref="dataSource" doc:name="Generic Database Configuration"/>
+	
+	<flow name="getCustomersFlow">
+        <flow-ref name="setallflowvariables" doc:name="setallflowvariables"/>
+        <ee:cache filterExpression="#[flowVars.bypasscache=='false']" doc:name="Cache">
+            <db:select config-ref="Generic_Database_Configuration" doc:name="Database">
+                <db:parameterized-query><![CDATA[select * from Customers]]></db:parameterized-query>
+            </db:select>
+            <logger message="After Hitting DB ================ #[payload.size()]" level="INFO" doc:name="Logger"></logger>
+        </ee:cache>
+        <flow-ref name="getpaginatedresult" doc:name="getpaginatedresult"/>
+
+		
+	</flow>
+    <flow name="getcustomersbypostcodeimpl">
+        <flow-ref name="setallflowvariables" doc:name="setallflowvariables"/>
+        <db:select config-ref="Generic_Database_Configuration" doc:name="Database">
+            <db:parameterized-query><![CDATA[select * from Customers where postcode =#[message.inboundProperties.'http.query.params'.postcode]]]></db:parameterized-query>
+        </db:select>
+        <flow-ref name="getpaginatedresult" doc:name="getpaginatedresult"/>
+    </flow>
+    <sub-flow name="setallflowvariables">
+        <expression-component doc:name="setflowvariables"><![CDATA[if(message.inboundProperties.'http.query.params'.offset == empty ) {
+  flowVars.offset=0 ;
+
+}else {
+flowVars.offset=message.inboundProperties.'http.query.params'.offset;
+
+}
+
+if(message.inboundProperties.'http.query.params'.limit == empty ) {
+  flowVars.limit=10 ;
+
+}else {
+flowVars.limit=message.inboundProperties.'http.query.params'.limit;
+
+}
+
+if(message.inboundProperties.'http.query.params'.bypasscache == 'false' ) {
+  flowVars.bypasscache= 'false' ;
+
+}else {
+flowVars.bypasscache= 'true';
+
+}
+
+]]></expression-component>
+    </sub-flow>
+    <sub-flow name="getpaginatedresult">
+        <expression-component doc:name="Expression for paginated result"><![CDATA[//payload=payload.subList(flowVars.offset,flowVars.limit)
+int offset=Integer.parseInt(flowVars.offset);
+int limit= Integer.parseInt(flowVars.limit);
+int lastIndex=0;
+int listSize=payload.size();
+if(listSize < offset+limit){
+lastIndex=listSize-1;
+}else{
+lastIndex=offset+limit;
+}
+if(listSize!=0 && offset < listSize && lastIndex<listSize) {
+payload=payload.subList(offset,lastIndex);
+}
+else{ payload=new java.util.ArrayList();
+}
+]]></expression-component>
+    </sub-flow>
+    <flow name="customerbyid">
+        <db:select config-ref="Generic_Database_Configuration" doc:name="Database">
+            <db:parameterized-query><![CDATA[select * from customers where id = #[flowVars.id]]]></db:parameterized-query>
+        </db:select>
+    </flow>
+</mule>
