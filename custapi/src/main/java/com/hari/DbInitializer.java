@@ -17,7 +17,7 @@ public void afterPropertiesSet() throws Exception {
 			
 			conn = DriverManager.getConnection(dbURL,"sa","");
 			Statement stmt = conn.createStatement();
-			stmt.executeUpdate("Drop TABLE Customers ");
+			stmt.executeUpdate("Drop TABLE IF EXISTS Customers ");
 
 			stmt.executeUpdate("CREATE TABLE Customers (id integer,firstName VARCHAR(255), lastName VARCHAR(255), city VARCHAR(255),country VARCHAR(255),postcode integer)");
 			stmt.executeUpdate("insert into  Customers (id,firstName , lastName , city ,country,postcode) values('1','hari','s','sydney','Australia',56001)");
