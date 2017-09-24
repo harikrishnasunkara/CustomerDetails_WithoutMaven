@@ -31,3 +31,9 @@ github.
 
 MUnit tests are also included.
 
+NOTE: If Username and Password incorrect(for Database) issue exists while running the code then kindly do the following
+
+1.Remove the username and password for the DB url in Src/main/java/DB initializer.java
+
+2.please remove the username and password from the line conn = DriverManager.getConnection(dbURL,"sa",""); in the configuration xml of customersserachapiimpl.xml
+
