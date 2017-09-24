@@ -14,7 +14,7 @@ To run this code please use the Mule server 3.8.5 EE.
 
 Configuration XMLS:
 
-1.Customersaerchapiusingresourcetypestrais.xml (API router process)
+1.Customersaerchapiusingresourcetypestraits.xml (API router process)
 2.Customersearchapiimpl.xml (Implementation process of API)
 3.Consumer.xml (Is for testing purpose)
 
